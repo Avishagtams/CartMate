@@ -1,0 +1,56 @@
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(46, 12, 12, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+  }
+  
+  .modal-card {
+    background: var(--card);
+    color: var(--ink);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    padding: 2rem;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    animation: fadeInUp 0.3s ease;
+  }
+  
+  .modal-card.danger {
+    border: 2px solid var(--danger);
+  }
+  
+  .modal-title {
+    margin-bottom: 1rem;
+    color: var(--brand);
+    font-size: 1.3rem;
+    font-weight: bold;
+  }
+  
+  .modal-body {
+    margin-bottom: 1.5rem;
+    color: var(--ink-2);
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  .modal-card .btn {
+    min-width: 90px;        /* פחות רחב */
+    padding: 0.4rem 1.2rem; /* פחות גבוה ויותר קומפקטי */
+    border-radius: var(--radius-lg);
+    font-size: 0.9rem;      /* טקסט קצת יותר קטן */
+  }
+  
+  

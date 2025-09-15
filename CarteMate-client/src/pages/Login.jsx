@@ -1,7 +1,9 @@
+
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { api } from "../api";
 import "../styles/auth.css";
+import Modal from "../components/Modal"; // ✨ ייבוא המודאל
 
 function Eye({off}) {
   return off ? (
@@ -23,10 +25,13 @@ export default function Login(){
   const [show, setShow] = useState(false);
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false); // ✨ שליטה על המודאל
   const nav = useNavigate();
 
   const submit = async (e) => {
-    e.preventDefault(); setMsg(""); setLoading(true);
+    e.preventDefault(); 
+    setMsg(""); 
+    setLoading(true);
     try{
       const data = await api("/api/auth/login", { method:"POST", body: form });
       localStorage.setItem("token", data.token);
@@ -34,7 +39,10 @@ export default function Login(){
       nav("/dashboard");
     }catch(err){
       setMsg(err.message || "שגיאה בהתחברות");
-    }finally{ setLoading(false); }
+      setShowModal(true); // 
+    }finally{ 
+      setLoading(false); 
+    }
   };
 
   return (
@@ -51,12 +59,10 @@ export default function Login(){
           <h1 className="auth-title">התחברות</h1>
           <p className="auth-sub">כדי להמשיך ל-CartMate</p>
 
-          {msg && <div className="alert">{msg}</div>}
-
           <form className="form" onSubmit={submit}>
             <label className="label" htmlFor="email">אימייל</label>
             <input
-              id="email" name="email" type="email" dir="ltr"
+              id="email" name="email" type="text" dir="ltr"
               className="input" placeholder="name@example.com"
               value={form.email} onChange={e=>setForm({...form, email:e.target.value})} required
             />
@@ -74,7 +80,7 @@ export default function Login(){
             </div>
 
             <button className="btn btn-primary" disabled={!form.email || !form.password || loading}>
-              {loading ? "מתחברת..." : "התחברי"}
+              {loading ? "מתחבר..." : "התחבר"}
             </button>
           </form>
 
@@ -83,6 +89,17 @@ export default function Login(){
           </p>
         </div>
       </section>
+
+      {/* ✨ מודאל הודעות */}
+      <Modal 
+        open={showModal} 
+        onClose={()=>setShowModal(false)} 
+        title="שגיאה"
+        danger
+      >
+        {msg}
+      </Modal>
     </main>
   );
 }
+
