@@ -81,5 +81,42 @@ router.get("/me", requireAuth, async (req, res) => {
   }
 });
 
+// UPDATE
+router.put("/update", requireAuth, async (req, res) => {
+  try {
+    const userId = req.userId; // מזהה מהטוקן (מוגדר במידלוור)
+    let { name, email, phone, password } = req.body;
+
+    // ולידציה בסיסית
+    if (!name || !email || !phone) {
+      return res.status(400).json({ msg: "Missing required fields" });
+    }
+    email = String(email).toLowerCase().trim();
+
+    // בניית אובייקט עדכון
+    const updateData = { name, email, phone };
+
+    if (password && password.length > 0) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updateData.password = hashedPassword;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      updateData,
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    if (!updatedUser) return res.status(404).json({ msg: "User not found" });
+
+    return res.json({
+      msg: "User updated successfully",
+      user: updatedUser,
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
 

@@ -4,6 +4,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Home from "./pages/Home";        
+import Profile from "./pages/Profile";
 import "./styles/tokens.css"; // נטען טוקנים פעם אחת
 
 export default function App(){
@@ -15,7 +17,9 @@ export default function App(){
         <Route path="/login" element={<Login/>}/>
         <Route path="/register" element={<Register/>}/>
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard/></ProtectedRoute>}/>
+        <Route path="/home" element={<ProtectedRoute><Home/></ProtectedRoute>}/>
         <Route path="*" element={<Login/>}/>
+        <Route path="/profile" element={<Profile/>} />
       </Routes>
     </BrowserRouter>
   );

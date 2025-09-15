@@ -36,7 +36,7 @@ export default function Login(){
       const data = await api("/api/auth/login", { method:"POST", body: form });
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
-      nav("/dashboard");
+      nav("/home");
     }catch(err){
       setMsg(err.message || "שגיאה בהתחברות");
       setShowModal(true); // 
