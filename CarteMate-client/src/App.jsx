@@ -1,24 +1,22 @@
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-import Register from "./pages/Register";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import TopBar from "./components/TopBar";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+import "./styles/tokens.css"; // נטען טוקנים פעם אחת
 
-export default function App() {
+export default function App(){
   return (
     <BrowserRouter>
-      <nav style={{display:"flex", gap:12, padding:12}}>
-        <Link to="/register">הרשמה</Link>
-        <Link to="/login">התחברות</Link>
-        <Link to="/dashboard">דשבורד</Link>
-      </nav>
+      <TopBar/>
       <Routes>
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="*" element={<Login />} />
+        <Route path="/" element={<Login/>}/>
+        <Route path="/login" element={<Login/>}/>
+        <Route path="/register" element={<Register/>}/>
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard/></ProtectedRoute>}/>
+        <Route path="*" element={<Login/>}/>
       </Routes>
     </BrowserRouter>
   );
 }
-

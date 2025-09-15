@@ -1,38 +1,88 @@
 import { useState } from "react";
-import { api } from "../api";
 import { useNavigate, Link } from "react-router-dom";
+import { api } from "../api";
+import "../styles/auth.css";
 
-export default function Login() {
+function Eye({off}) {
+  return off ? (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path d="M3 3l18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M6 7.8A11 11 0 003 12c1.7 3 4.9 5.5 9 5.5 1.3 0 2.6-.2 3.7-.6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M9.9 5.2A11 11 0 0121 12c-1.7 3-4.9 5.5-9 5.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    </svg>
+  ) : (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path d="M2 12s3.8-7 10-7 10 7 10 7-3.8 7-10 7S2 12 2 12z" stroke="currentColor" strokeWidth="2"/>
+      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
+    </svg>
+  );
+}
+
+export default function Login(){
   const [form, setForm] = useState({ email:"", password:"" });
+  const [show, setShow] = useState(false);
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const nav = useNavigate();
 
-  const onChange = e => setForm({ ...form, [e.target.name]: e.target.value });
-
   const submit = async (e) => {
-    e.preventDefault();
-    setLoading(true); setMsg("");
-    try {
+    e.preventDefault(); setMsg(""); setLoading(true);
+    try{
       const data = await api("/api/auth/login", { method:"POST", body: form });
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
       nav("/dashboard");
-    } catch (err) {
-      setMsg(err.message);
-    } finally { setLoading(false); }
+    }catch(err){
+      setMsg(err.message || "שגיאה בהתחברות");
+    }finally{ setLoading(false); }
   };
 
   return (
-    <div style={{maxWidth:420, margin:"40px auto"}}>
-      <h2>התחברות</h2>
-      <form onSubmit={submit} style={{display:"grid", gap:10}}>
-        <input name="email" type="email" placeholder="אימייל" value={form.email} onChange={onChange} required />
-        <input name="password" type="password" placeholder="סיסמה" value={form.password} onChange={onChange} required />
-        <button disabled={loading}>{loading ? "בודקת..." : "התחברי"}</button>
-      </form>
-      <p style={{color:"crimson"}}>{msg}</p>
-      <p>אין לך חשבון? <Link to="/register">הרשמה</Link></p>
-    </div>
+    <main className="page-hero" dir="rtl">
+      <section className="auth-shell">
+        {/* אילוסטרציה */}
+        <aside className="illus glass" aria-hidden="true">
+          <span className="illus-tag">ברוכה הבאה</span>
+          <img alt="Checklist notebook" src="/images/image.png" />
+        </aside>
+
+        {/* טופס */}
+        <div className="auth-card glass">
+          <h1 className="auth-title">התחברות</h1>
+          <p className="auth-sub">כדי להמשיך ל-CartMate</p>
+
+          {msg && <div className="alert">{msg}</div>}
+
+          <form className="form" onSubmit={submit}>
+            <label className="label" htmlFor="email">אימייל</label>
+            <input
+              id="email" name="email" type="email" dir="ltr"
+              className="input" placeholder="name@example.com"
+              value={form.email} onChange={e=>setForm({...form, email:e.target.value})} required
+            />
+
+            <label className="label" htmlFor="password">סיסמה</label>
+            <div className="input-wrap">
+              <input
+                id="password" name="password" dir="ltr"
+                type={show ? "text":"password"} className="input" placeholder="••••••••"
+                value={form.password} onChange={e=>setForm({...form, password:e.target.value})} required
+              />
+              <button type="button" className="eye" onClick={()=>setShow(s=>!s)} aria-label={show?"הסתר סיסמה":"הצג סיסמה"}>
+                <Eye off={show}/>
+              </button>
+            </div>
+
+            <button className="btn btn-primary" disabled={!form.email || !form.password || loading}>
+              {loading ? "מתחברת..." : "התחברי"}
+            </button>
+          </form>
+
+          <p className="footer">
+            אין לך חשבון? <Link to="/register" className="link">להרשמה</Link>
+          </p>
+        </div>
+      </section>
+    </main>
   );
 }

@@ -1,0 +1,20 @@
+:root{
+    /* Burgundy palette */
+    --bg: #F9F3F4;              /* רקע דף עדין */
+    --card: #FFFFFF;            /* כרטיס לבן */
+    --ink: #2E0C0C;             /* טקסט ראשי */
+    --ink-2:#7A4D4D;            /* טקסט משני */
+    --line:#E4C9C9;             /* קו רך */
+    --brand:#8B0000;            /* בורדו */
+    --brand-2:#A32020;          /* hover */
+    --brand-ink:#FFFFFF;        /* טקסט על בורדו */
+    --danger:#B10E1E;
+  
+    --radius-xl: 20px;
+    --radius-lg: 16px;
+    --shadow-lg: 0 24px 60px rgba(59,10,10,.12);
+    --shadow:    0 12px 36px rgba(59,10,10,.10);
+  
+    --header-h: 72px;
+  }
+  

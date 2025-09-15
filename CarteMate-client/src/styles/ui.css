@@ -1,0 +1,47 @@
+:root{
+    --header-h: 64px;
+  
+    /* פלטה חמה “אפרסק קניות” */
+    --peach:      #FF8A5B;
+    --peach-dark: #FF6F3D;
+    --peach-100:  #FFF2EA;
+    --ink:        #2F2A28;
+    --card:       #FFFFFF;
+  }
+  
+  /* ——— TOPBAR ——— */
+  .topbar{
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    height: var(--header-h);
+    background: linear-gradient(90deg, #FFE2D1 0%, #FFF2EA 60%, #FFE8DB 100%);
+    border-bottom: 1px solid #F3E4DC;
+    backdrop-filter: saturate(130%) blur(4px);
+  }
+  
+  .topbar__inner{
+    height: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .topbar__inner.center{
+    justify-content: center; /* ממורכז באמצע */
+  }
+  
+  .brand{
+    display: flex; align-items: center; gap: 8px;
+    color: var(--ink); font-weight: 900; letter-spacing: .2px;
+    font-size: 20px;
+  }
+  .brand__logo{ font-size: 24px }
+  .brand__name{ font-size: 20px }
+  
+  /* בסיס */
+  html, body { height: 100%; }
+  body { margin: 0; font-family: "Segoe UI", Tahoma, sans-serif; color: var(--ink); }
+  

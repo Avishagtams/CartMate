@@ -1,0 +1,70 @@
+@import "./tokens.css";
+
+html,body{height:100%}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Segoe UI", Heebo, Arial, sans-serif;
+}
+#root{max-width:none; padding:0}
+
+.container{max-width:1140px; margin:0 auto; padding:0 20px}
+
+/* topbar */
+.topbar{
+  height:var(--header-h);
+  backdrop-filter:saturate(140%) blur(8px);
+  -webkit-backdrop-filter:saturate(140%) blur(8px);
+  background:rgba(255,255,255,.65);
+  border-bottom:1px solid rgba(228,201,201,.6);
+  position:sticky; top:0; z-index:10;
+}
+.topbar .inner{
+  height:100%; display:flex; align-items:center; justify-content:center;
+  gap:12px;
+}
+.brand{
+  display:flex; align-items:center; gap:10px;
+  font-weight:900; letter-spacing:.2px; font-size:20px;
+}
+.brand-badge{
+  width:36px; height:36px; border-radius:12px;
+  display:grid; place-items:center;
+  background:var(--brand); color:var(--brand-ink);
+  box-shadow:0 8px 22px rgba(139,0,0,.25);
+}
+
+/* hero background pattern */
+.page-hero{
+  min-height:calc(100vh - var(--header-h));
+  display:grid; place-items:center;
+  background:
+    radial-gradient(1200px 700px at 100% 0%, rgba(139,0,0,.06), transparent),
+    radial-gradient(1200px 700px at 0% 100%, rgba(163,32,32,.05), transparent),
+    url("/images/bg-checklist.png");
+  background-size: 480px auto, 480px auto, 420px auto;
+  background-repeat:no-repeat, no-repeat, repeat;
+}
+
+/* “glass card” */
+.glass{
+  background:rgba(255,255,255,.86);
+  border:1px solid rgba(228,201,201,.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius:var(--radius-xl);
+  box-shadow:var(--shadow-lg);
+}
+
+/* buttons */
+.btn{
+  height:52px; border-radius:14px; border:0; cursor:pointer;
+  font-weight:900; letter-spacing:.2px;
+}
+.btn-primary{ background:var(--brand); color:var(--brand-ink); }
+.btn-primary:hover{ background:var(--brand-2) }
+.btn:disabled{ opacity:.6; cursor:not-allowed }
+
+/* links */
+.link{ color:var(--brand); text-decoration:none; border-bottom:1px solid transparent }
+.link:hover{ border-bottom-color:var(--brand) }
