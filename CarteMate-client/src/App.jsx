@@ -6,6 +6,8 @@ import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";        
 import Profile from "./pages/Profile";
+import NewList from "./pages/NewList";
+import ListView from "./pages/ListView";
 import "./styles/tokens.css"; // נטען טוקנים פעם אחת
 
 export default function App(){
@@ -20,6 +22,8 @@ export default function App(){
         <Route path="/home" element={<ProtectedRoute><Home/></ProtectedRoute>}/>
         <Route path="*" element={<Login/>}/>
         <Route path="/profile" element={<Profile/>} />
+        <Route path="/lists/new" element={<NewList />} /> {/* 👈 חדש */}
+        <Route path="/lists/:id" element={<ListView />} />
       </Routes>
     </BrowserRouter>
   );
