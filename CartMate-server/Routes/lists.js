@@ -2,6 +2,7 @@ const express = require("express");
 const requireAuth = require("../middleware/auth");
 const List = require("../models/List");
 const User = require("../models/User");
+const sendMail = require("../utils/sendMail");
 
 const router = express.Router();
 
@@ -223,6 +224,101 @@ router.delete("/:listId/items/:itemId", requireAuth, async (req, res) => {
     res.json(list); // מחזירים את הרשימה המעודכנת
   } catch (err) {
     res.status(500).json({ msg: "שגיאה במחיקת מוצר", error: err.message });
+  }
+});
+
+// ✅ התחלת נעילה ושליחת מייל לכל המשתתפים
+router.post("/:id/lock", requireAuth, async (req, res) => {
+  try {
+    const { minutes } = req.body;
+    const mins = Number(minutes);
+    if (!mins || mins <= 0) return res.status(400).json({ msg: "מספר דקות לא תקין" });
+
+    const list = await List.findById(req.params.id)
+      .populate("owner", "name email phone")
+      .populate("sharedWith", "name email phone");
+
+    if (!list) return res.status(404).json({ msg: "List not found" });
+
+    if (
+      list.owner._id.toString() !== req.userId &&
+      !list.sharedWith.some((u) => u._id.toString() === req.userId)
+    ) {
+      return res.status(403).json({ msg: "Not authorized" });
+    }
+
+    const now = new Date();
+
+    if (list.lockUntil && list.lockUntil > now) {
+      const at = list.lockUntil.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+      return res.status(409).json({ msg: `הרשימה כבר נעולה עד ${at}` });
+    }
+
+    const lockUntil = new Date(now.getTime() + mins * 60000);
+    list.lockUntil = lockUntil;
+    list.lockNotifiedAt = now;
+
+    const emails = [list.owner?.email, ...list.sharedWith.map(u => u?.email)].filter(Boolean);
+
+    if (emails.length > 0) {
+      const humanTime = lockUntil.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+    
+      const listName = list.name || "ללא שם";
+    
+      await sendMail({
+        to: emails,
+        subject: `CartMate 🛒 - הרשימה "${listName}" תינעל בעוד ${mins} דקות!`,
+        text: `הרשימה "${listName}" תינעל בעוד ${mins} דקות (בשעה ${humanTime}). זה הזמן להוסיף פריטים.`,
+        html: `
+          <div dir="rtl" style="font-family:Arial,sans-serif;">
+            <h2>📢 הרשימה "<strong>${listName}</strong>" תינעל בעוד ${mins} דקות</h2>
+            <p>בשעה <strong>${humanTime}</strong> תינעל הרשימה שלך באפליקציית CartMate.</p>
+            <p>אם יש לך פריטים להוסיף — עכשיו הזמן!</p>
+          </div>
+        `
+      });
+    }
+    
+   
+
+    await list.save();
+    res.json({ msg: `הרשימה תינעל בעוד ${mins} דקות. נשלח מייל לכל המשתתפים.`, lockUntil });
+  } catch (err) {
+    console.error("Lock list error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ✅ שליחת מייל כשמתחילים קניות
+router.post("/:id/start-shopping", requireAuth, async (req, res) => {
+  try {
+    const list = await List.findById(req.params.id).populate("sharedWith", "email name");
+
+    if (!list) return res.status(404).json({ msg: "List not found" });
+
+    if (list.owner.toString() !== req.userId) {
+      return res.status(403).json({ msg: "Only the owner can start shopping" });
+    }
+
+    const emails = list.sharedWith.map(u => u.email).filter(Boolean);
+    if (emails.length === 0) {
+      return res.status(400).json({ msg: "No email addresses found" });
+    }
+
+    const subject = "🚨 CartMate – יוצאים לקניות!";
+    const message = `שלום,\n\nהמשתמש שלך יוצא כעת לקניות עבור הרשימה \"${list.name}\".\n\nהיכנסו לאפליקציה כדי לעקוב.`;
+
+    await sendMail({
+      to: emails,
+      subject,
+      text: message,
+      html: `<div dir="rtl" style="font-family:Arial,sans-serif;"><h2>${subject}</h2><p>${message.replace("\n", "<br>")}</p></div>`
+    });
+
+    res.json({ msg: "Email sent" });
+  } catch (err) {
+    console.error("Start shopping error:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 
