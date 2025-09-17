@@ -1,18 +1,40 @@
+/* פונט ברירת מחדל לכל האתר */
+body {
+  font-family: "Playpen Sans Hebrew", cursive;
+}
+
 .page-list {
   display: flex;
+  flex-direction: row; /* שני טורים */
+  justify-content: center;
+  align-items: stretch; /* כל הטורים יתפרשו לגובה מלא */
+  gap: 2rem;
+  padding: 2rem;
+  height: 92vh; /* טיפה פחות מהמסך כדי לא לגלוש */
+  box-sizing: border-box;
+}
+
+.list-info {
+  flex: 0 0 250px; /* טור ימין קבוע */
+  display: flex;
   flex-direction: column;
-  height: 100vh;
+  justify-content: space-between; /* כותרת למעלה, כפתורים למטה */
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  background: var(--card);
 }
 
 .list-header {
-  padding: 1rem;
-  text-align: center;
+  margin-bottom: 1rem;
+  text-align: center; /* שם הרשימה ממורכז */
 }
 
 .list-title {
   font-size: 1.6rem;
   font-weight: bold;
   color: var(--ink);
+  font-family: "Playpen Sans Hebrew", cursive;
 }
 
 .list-sub {
@@ -20,58 +42,149 @@
   color: var(--ink-2);
 }
 
+/* הכפתורים בתחתית */
+.list-footer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 עמודות */
+  grid-template-rows: repeat(2, auto);   /* 2 שורות */
+  gap: 0.8rem;
+  text-align: center;
+}
+
+.icon-btn {
+  display: flex;
+  flex-direction: column; /* אייקון למעלה, טקסט מתחת */
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-size: 1.6rem; /* גודל האייקון */
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+  padding: 0.6rem;
+  width: 100%;
+  height: 80px; /* מקום גם לאייקון וגם לטקסט */
+}
+
+.icon-btn:hover {
+  transform: scale(1.05);
+  background: var(--bg);
+}
+
+.icon-label {
+  font-size: 0.75rem;
+  color: var(--ink-2);
+  font-family: "Playpen Sans Hebrew", cursive;
+}
+
+/* טור שמאל: רשימת מוצרים */
 .list-items {
+  position: relative; /* בשביל הספירלה */
   flex: 1;
   padding: 1rem;
   overflow-y: auto;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--card) 0,
+    var(--card) 34px,
+    #e9dcdc 34px,
+    #e9dcdc 35px
+  );
+  background-position-y: 6px; /* יישור הקווים ביחס לכתב */
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  font-family: "Playpen Sans Hebrew", cursive;
+}
+
+.list-items::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0; /* הספירלה נשארת מוצמדת לימין */
+  width: 90px;
+  height: 100%;
+  background: url("/images/spiral.png") no-repeat center;
+  background-size: cover;
+  pointer-events: none;
+  filter: brightness(200%) contrast(90%);
+  transform: translateX(60px); /* מזיז ימינה */
 }
 
 .list-items ul {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
 .list-items li {
-  padding: 0.8rem 1rem;
-  margin-bottom: 0.5rem;
-  background: var(--card);
-  border-radius: var(--radius-lg);
-  cursor: pointer;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  box-shadow: var(--shadow);
-  transition: background 0.2s;
+  gap: 0.8rem;
+  height: 35px;        /* כל שורה תופסת בדיוק גובה של פס */
+  line-height: 35px;   /* הטקסט מיושר לפסים */
+  margin: 0;
+  padding: 0 0.4rem;
+  cursor: pointer;
+  padding-right: 1.5rem;  /* אפשר לשחק עם הערך */
+  font-family: "Playpen Sans Hebrew", cursive;
 }
 
-.list-items li:hover {
-  background: var(--bg);
-}
-
-.list-items li.done {
+.list-items li.done span {
   text-decoration: line-through;
   color: var(--ink-2);
 }
 
-.checkmark {
-  margin-right: 0.5rem;
+.list-items input[type="checkbox"] {
+  accent-color: var(--brand);
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
 }
 
-.list-footer {
-  display: flex;
-  justify-content: space-around;
-  padding: 1rem;
-  border-top: 1px solid var(--line);
+/* כותרת רשימה */
+.list-heading {
+  font-size: 1.7rem;
+  font-weight: bold;
+  color: var(--brand); /* כמו כפתור שמירה */
+  line-height: 35px;
+  height: 35px;
+  padding-right: 1.5rem;
+  pointer-events: none; /* לא לחיץ */
+  font-family: "Playpen Sans Hebrew", cursive;
 }
 
-.icon-btn {
-  font-size: 1.6rem;
+/* כפתור מחיקה קטן */
+.delete-btn {
   background: none;
   border: none;
   cursor: pointer;
-  transition: transform 0.2s;
+  font-size: 1rem;
+  color: var(--ink-2);
+  transition: color 0.2s, transform 0.2s;
+  margin-right: auto; /* מצמיד את הכפתור לצד שמאל */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.icon-btn:hover {
+.delete-btn:hover {
+  color: var(--danger, #d9534f); /* אדום כשמרחפים */
   transform: scale(1.2);
+}
+
+.delete-btn svg {
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+}
+
+/* הודעה כשאין מוצרים */
+.no-items {
+  text-align: center;        /* לצד שמאל */
+  font-size: 1.2rem;       /* גדול יותר */
+  font-weight: bold;       /* מודגש */
+  color: var(--ink);       /* בצבע טקסט ראשי */
+  margin: 1rem;            /* קצת רווח */
 }
