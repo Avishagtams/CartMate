@@ -23,7 +23,7 @@ export default function Home(){
 
       {/* שלוש האופציות */}
       <div className="home-options">
-        <div className="circle" onClick={()=>nav("/lists")}>
+        <div className="circle" onClick={()=>nav("/mylists")}>
           <span>📋</span>
           <p>הרשימות שלי</p>
         </div>
@@ -41,3 +41,4 @@ export default function Home(){
     </main>
   );
 }
+

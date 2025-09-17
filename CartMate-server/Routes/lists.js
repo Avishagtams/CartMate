@@ -322,5 +322,21 @@ router.post("/:id/start-shopping", requireAuth, async (req, res) => {
   }
 });
 
+// ✅ שליפת כל הרשימות של המשתמש המחובר
+router.get("/", requireAuth, async (req, res) => {
+  try {
+    const lists = await List.find({
+      $or: [{ owner: req.userId }, { sharedWith: req.userId }]
+    })
+      .populate("owner", "name email phone")
+      .populate("sharedWith", "name email phone");
+
+    res.json(lists);
+  } catch (err) {
+    console.error("שגיאה בשליפת רשימות:", err);
+    res.status(500).json({ error: "שגיאה בטעינת הרשימות" });
+  }
+});
+
 
 module.exports = router;

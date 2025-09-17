@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import NewList from "./pages/NewList";
 import ListView from "./pages/ListView";
+import MyLists from "./pages/mylists";  
 import "./styles/tokens.css"; // נטען טוקנים פעם אחת
 
 export default function App(){
@@ -24,6 +25,7 @@ export default function App(){
         <Route path="/profile" element={<Profile/>} />
         <Route path="/lists/new" element={<NewList />} /> {/* 👈 חדש */}
         <Route path="/lists/:id" element={<ListView />} />
+        <Route path="/mylists" element={<MyLists />} /> {/* 👈 חדש */}
       </Routes>
     </BrowserRouter>
   );
