@@ -43,7 +43,11 @@ router.post("/", requireAuth, async (req, res) => {
       sharedWith: sharedUsers
     });
 
-    res.status(201).json(list);
+    const populated = await List.findById(list._id)
+      .populate("owner", "name email phone")
+      .populate("sharedWith", "name email phone");
+
+    res.status(201).json(populated);
   } catch (err) {
     console.error("שגיאה ביצירת רשימה:", err);
     res.status(500).json({ error: "שגיאה ביצירת רשימה" });
@@ -59,7 +63,6 @@ router.get("/:id", requireAuth, async (req, res) => {
 
     if (!list) return res.status(404).json({ msg: "הרשימה לא נמצאה" });
 
-    // רק הבעלים או שותפים יכולים לגשת
     if (
       list.owner._id.toString() !== req.userId &&
       !list.sharedWith.some((u) => u._id.toString() === req.userId)
@@ -94,7 +97,12 @@ router.put("/:id/toggle/:itemId", requireAuth, async (req, res) => {
     item.done = !item.done;
     await list.save();
 
-    res.json(list);
+    // ✅ החזרה עם populate כדי לכלול את השותפים
+    const updated = await List.findById(req.params.id)
+      .populate("owner", "name email phone")
+      .populate("sharedWith", "name email phone");
+
+    res.json(updated);
   } catch (err) {
     console.error("שגיאה בעדכון פריט:", err);
     res.status(500).json({ error: "שגיאה בעדכון פריט ברשימה" });
@@ -112,7 +120,6 @@ router.put("/:id/add-users", requireAuth, async (req, res) => {
     const list = await List.findById(req.params.id);
     if (!list) return res.status(404).json({ msg: "הרשימה לא נמצאה" });
 
-    // רק הבעלים יכול להוסיף משתמשים
     if (list.owner.toString() !== req.userId) {
       return res.status(403).json({ msg: "רק בעל הרשימה יכול להוסיף משתמשים" });
     }
@@ -129,6 +136,7 @@ router.put("/:id/add-users", requireAuth, async (req, res) => {
     });
 
     await list.save();
+
     const updated = await List.findById(list._id)
       .populate("owner", "name email phone")
       .populate("sharedWith", "name email phone");
@@ -153,7 +161,6 @@ router.post("/:id/items", requireAuth, async (req, res) => {
     const list = await List.findById(req.params.id);
     if (!list) return res.status(404).json({ msg: "הרשימה לא נמצאה" });
 
-    // רק הבעלים או שותפים יכולים להוסיף מוצרים
     if (
       list.owner.toString() !== req.userId &&
       !list.sharedWith.some((id) => id.toString() === req.userId)
@@ -161,7 +168,6 @@ router.post("/:id/items", requireAuth, async (req, res) => {
       return res.status(403).json({ msg: "אין לך הרשאה להוסיף מוצרים לרשימה זו" });
     }
 
-    // הוספת המוצר
     list.items.push({
       name,
       quantity: quantity || 1,
@@ -170,6 +176,7 @@ router.post("/:id/items", requireAuth, async (req, res) => {
 
     await list.save();
 
+    // ✅ החזרה עם populate מלא
     const updated = await List.findById(list._id)
       .populate("owner", "name email phone")
       .populate("sharedWith", "name email phone");
@@ -181,7 +188,7 @@ router.post("/:id/items", requireAuth, async (req, res) => {
   }
 });
 
-// עדכון מוצר קיים ברשימה
+// ✅ עדכון מוצר קיים
 router.put("/:id/items/:itemId", requireAuth, async (req, res) => {
   try {
     const { id, itemId } = req.params;
@@ -197,37 +204,40 @@ router.put("/:id/items/:itemId", requireAuth, async (req, res) => {
     if (quantity) item.quantity = quantity;
 
     await list.save();
-    res.json(list);
+
+    const updated = await List.findById(id)
+      .populate("owner", "name email phone")
+      .populate("sharedWith", "name email phone");
+
+    res.json(updated);
   } catch (err) {
     console.error("Update item error:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// מחיקת מוצר ספציפי מהרשימה
+// ✅ מחיקת מוצר מהרשימה
 router.delete("/:listId/items/:itemId", requireAuth, async (req, res) => {
   try {
     const { listId, itemId } = req.params;
-
-    // מוצאים את הרשימה
     const list = await List.findById(listId);
-    if (!list) {
-      return res.status(404).json({ msg: "הרשימה לא נמצאה" });
-    }
+    if (!list) return res.status(404).json({ msg: "הרשימה לא נמצאה" });
 
-    // מסננים את המוצר החוצה
     list.items = list.items.filter((item) => item._id.toString() !== itemId);
-
-    // שמירה
     await list.save();
 
-    res.json(list); // מחזירים את הרשימה המעודכנת
+    // ✅ החזרה עם populate
+    const updated = await List.findById(listId)
+      .populate("owner", "name email phone")
+      .populate("sharedWith", "name email phone");
+
+    res.json(updated);
   } catch (err) {
     res.status(500).json({ msg: "שגיאה במחיקת מוצר", error: err.message });
   }
 });
 
-// ✅ התחלת נעילה ושליחת מייל לכל המשתתפים
+// ✅ נעילת רשימה ושליחת מייל
 router.post("/:id/lock", requireAuth, async (req, res) => {
   try {
     const { minutes } = req.body;
@@ -240,15 +250,7 @@ router.post("/:id/lock", requireAuth, async (req, res) => {
 
     if (!list) return res.status(404).json({ msg: "List not found" });
 
-    if (
-      list.owner._id.toString() !== req.userId &&
-      !list.sharedWith.some((u) => u._id.toString() === req.userId)
-    ) {
-      return res.status(403).json({ msg: "Not authorized" });
-    }
-
     const now = new Date();
-
     if (list.lockUntil && list.lockUntil > now) {
       const at = list.lockUntil.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
       return res.status(409).json({ msg: `הרשימה כבר נעולה עד ${at}` });
@@ -262,24 +264,15 @@ router.post("/:id/lock", requireAuth, async (req, res) => {
 
     if (emails.length > 0) {
       const humanTime = lockUntil.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
-    
       const listName = list.name || "ללא שם";
-    
+
       await sendMail({
         to: emails,
         subject: `CartMate 🛒 - הרשימה "${listName}" תינעל בעוד ${mins} דקות!`,
         text: `הרשימה "${listName}" תינעל בעוד ${mins} דקות (בשעה ${humanTime}). זה הזמן להוסיף פריטים.`,
-        html: `
-          <div dir="rtl" style="font-family:Arial,sans-serif;">
-            <h2>📢 הרשימה "<strong>${listName}</strong>" תינעל בעוד ${mins} דקות</h2>
-            <p>בשעה <strong>${humanTime}</strong> תינעל הרשימה שלך באפליקציית CartMate.</p>
-            <p>אם יש לך פריטים להוסיף — עכשיו הזמן!</p>
-          </div>
-        `
+        html: `<div dir="rtl" style="font-family:Arial,sans-serif;"><h2>📢 הרשימה "<strong>${listName}</strong>" תינעל בעוד ${mins} דקות</h2><p>בשעה <strong>${humanTime}</strong> תינעל הרשימה שלך באפליקציית CartMate.</p></div>`
       });
     }
-    
-   
 
     await list.save();
     res.json({ msg: `הרשימה תינעל בעוד ${mins} דקות. נשלח מייל לכל המשתתפים.`, lockUntil });
@@ -289,40 +282,31 @@ router.post("/:id/lock", requireAuth, async (req, res) => {
   }
 });
 
-// ✅ שליחת מייל כשמתחילים קניות
-router.post("/:id/start-shopping", requireAuth, async (req, res) => {
+// עזיבת רשימה
+router.post('/:id/leave', requireAuth, async (req, res) => {
   try {
-    const list = await List.findById(req.params.id).populate("sharedWith", "email name");
-
-    if (!list) return res.status(404).json({ msg: "List not found" });
-
-    if (list.owner.toString() !== req.userId) {
-      return res.status(403).json({ msg: "Only the owner can start shopping" });
+    const userId = req.userId; 
+    const list = await List.findById(req.params.id);
+    if (!list) {
+      return res.status(404).json({ msg: "הרשימה לא נמצאה" });
     }
-
-    const emails = list.sharedWith.map(u => u.email).filter(Boolean);
-    if (emails.length === 0) {
-      return res.status(400).json({ msg: "No email addresses found" });
+    if (list.owner.toString() === userId) {
+      return res
+        .status(400)
+        .json({ msg: "בעל הרשימה לא יכול לעזוב בלי להעביר בעלות" });
     }
-
-    const subject = "🚨 CartMate – יוצאים לקניות!";
-    const message = `שלום,\n\nהמשתמש שלך יוצא כעת לקניות עבור הרשימה \"${list.name}\".\n\nהיכנסו לאפליקציה כדי לעקוב.`;
-
-    await sendMail({
-      to: emails,
-      subject,
-      text: message,
-      html: `<div dir="rtl" style="font-family:Arial,sans-serif;"><h2>${subject}</h2><p>${message.replace("\n", "<br>")}</p></div>`
-    });
-
-    res.json({ msg: "Email sent" });
+    list.sharedWith = list.sharedWith.filter(
+      (u) => u.toString() !== userId
+    );
+    await list.save();
+    res.json({ msg: "עזבת את הרשימה בהצלחה" });
   } catch (err) {
-    console.error("Start shopping error:", err);
-    res.status(500).json({ error: err.message });
+    console.error("שגיאה בעזיבת רשימה:", err);
+    res.status(500).json({ msg: "שגיאה בעזיבת הרשימה" });
   }
 });
 
-// ✅ שליפת כל הרשימות של המשתמש המחובר
+// ✅ שליפת כל הרשימות של המשתמש
 router.get("/", requireAuth, async (req, res) => {
   try {
     const lists = await List.find({
@@ -337,6 +321,5 @@ router.get("/", requireAuth, async (req, res) => {
     res.status(500).json({ error: "שגיאה בטעינת הרשימות" });
   }
 });
-
 
 module.exports = router;
